@@ -1,0 +1,466 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>청-지청-센터 자동 취합</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --line: #d9deea;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #0f766e;
+      --warn: #b91c1c;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top right, #e6fffb, transparent 45%), var(--bg);
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+    }
+
+    .sub {
+      margin: 0 0 18px;
+      color: var(--muted);
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+    }
+
+    .panel-title {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 6px;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f2f5fb;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    td input {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 6px;
+      font-size: 13px;
+    }
+
+    td input[type="number"] { text-align: right; }
+    .num { text-align: right; }
+    .invalid { border-color: var(--warn) !important; background: #fff5f5; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .wrap { padding: 16px 10px 26px; }
+      h1 { font-size: 22px; }
+      th, td { font-size: 12px; padding: 5px; }
+      td input { font-size: 12px; padding: 5px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>청-지청-센터 자동 취합</h1>
+    <p class="sub">센터 담당자가 행 입력만 하면 청 전체/지청별/센터별 수량이 자동 취합됩니다.</p>
+
+    <section class="panel">
+      <h2 class="panel-title">센터 입력</h2>
+      <div class="toolbar">
+        <button class="primary" id="addRowBtn" type="button">행 추가</button>
+        <button id="addSampleBtn" type="button">샘플 데이터 추가</button>
+        <button id="clearBtn" type="button">전체 비우기</button>
+      </div>
+
+      <table id="inputTable">
+        <thead>
+          <tr>
+            <th>청</th>
+            <th>지청</th>
+            <th>센터</th>
+            <th>품목코드</th>
+            <th>품목명</th>
+            <th>필요수량</th>
+            <th>비고(선택)</th>
+            <th>삭제</th>
+          </tr>
+        </thead>
+        <tbody id="inputBody"></tbody>
+      </table>
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <div class="grid">
+      <section class="panel">
+        <h2 class="panel-title">취합_청전체 (품목별)</h2>
+        <table>
+          <thead>
+            <tr><th>품목코드</th><th>품목명</th><th class="num">필요수량합계</th></tr>
+          </thead>
+          <tbody id="sumOrg"></tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <h2 class="panel-title">취합_지청별 (지청 + 품목)</h2>
+        <table>
+          <thead>
+            <tr><th>지청</th><th>품목코드</th><th>품목명</th><th class="num">필요수량합계</th></tr>
+          </thead>
+          <tbody id="sumBranch"></tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <h2 class="panel-title">취합_센터원본 (지청 + 센터 + 품목)</h2>
+        <table>
+          <thead>
+            <tr><th>지청</th><th>센터</th><th>품목코드</th><th>품목명</th><th class="num">필요수량합계</th></tr>
+          </thead>
+          <tbody id="sumCenter"></tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const inputBody = document.getElementById('inputBody');
+    const sumOrg = document.getElementById('sumOrg');
+    const sumBranch = document.getElementById('sumBranch');
+    const sumCenter = document.getElementById('sumCenter');
+    const stats = document.getElementById('stats');
+
+    const STORAGE_KEY = 'org-branch-center-collect-v1';
+
+    function createCellInput(type = 'text', placeholder = '') {
+      const input = document.createElement('input');
+      input.type = type;
+      if (placeholder) input.placeholder = placeholder;
+      input.addEventListener('input', () => {
+        saveRows();
+        recalc();
+      });
+      return input;
+    }
+
+    function addRow(data = {}) {
+      const tr = document.createElement('tr');
+
+      const fields = [
+        ['org', 'text', '예: 본청'],
+        ['branch', 'text', '예: 동부지청'],
+        ['center', 'text', '예: 1센터'],
+        ['itemCode', 'text', '예: P001'],
+        ['itemName', 'text', '예: 마스크'],
+        ['qty', 'number', '0'],
+        ['note', 'text', '선택 입력']
+      ];
+
+      fields.forEach(([name, type, ph]) => {
+        const td = document.createElement('td');
+        const input = createCellInput(type, ph);
+        input.dataset.field = name;
+        if (type === 'number') {
+          input.min = '0';
+          input.step = '1';
+        }
+        input.value = data[name] ?? '';
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+
+      const removeTd = document.createElement('td');
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.textContent = '삭제';
+      removeBtn.addEventListener('click', () => {
+        tr.remove();
+        saveRows();
+        recalc();
+      });
+      removeTd.appendChild(removeBtn);
+      tr.appendChild(removeTd);
+
+      inputBody.appendChild(tr);
+    }
+
+    function getRows() {
+      return Array.from(inputBody.querySelectorAll('tr')).map((tr) => {
+        const get = (field) => tr.querySelector(`input[data-field="${field}"]`);
+        return {
+          tr,
+          org: get('org'),
+          branch: get('branch'),
+          center: get('center'),
+          itemCode: get('itemCode'),
+          itemName: get('itemName'),
+          qty: get('qty'),
+          note: get('note')
+        };
+      });
+    }
+
+    function normalize(v) {
+      return (v ?? '').toString().trim();
+    }
+
+    function rowIsEmpty(r) {
+      return [r.org, r.branch, r.center, r.itemCode, r.itemName, r.qty]
+        .every((el) => normalize(el.value) === '');
+    }
+
+    function toValidRecord(r) {
+      const req = [r.org, r.branch, r.center, r.itemName, r.qty];
+      req.forEach((el) => el.classList.remove('invalid'));
+
+      if (rowIsEmpty(r)) return null;
+
+      let valid = true;
+      req.forEach((el) => {
+        if (normalize(el.value) === '') {
+          el.classList.add('invalid');
+          valid = false;
+        }
+      });
+
+      const qtyNum = Number(normalize(r.qty.value));
+      if (!Number.isFinite(qtyNum) || qtyNum < 0) {
+        r.qty.classList.add('invalid');
+        valid = false;
+      }
+
+      if (!valid) return undefined;
+
+      return {
+        org: normalize(r.org.value),
+        branch: normalize(r.branch.value),
+        center: normalize(r.center.value),
+        itemCode: normalize(r.itemCode.value),
+        itemName: normalize(r.itemName.value),
+        qty: qtyNum,
+        note: normalize(r.note.value)
+      };
+    }
+
+    function renderTable(tbody, rows, cols) {
+      tbody.innerHTML = '';
+      if (!rows.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = cols.length;
+        td.textContent = '데이터 없음';
+        td.style.color = '#6b7280';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      rows.forEach((row) => {
+        const tr = document.createElement('tr');
+        cols.forEach((col) => {
+          const td = document.createElement('td');
+          const value = row[col.key];
+          td.textContent = col.num ? Number(value).toLocaleString('ko-KR') : value;
+          if (col.num) td.className = 'num';
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    function recalc() {
+      const lines = getRows();
+      const allRecords = [];
+      let invalidCount = 0;
+
+      lines.forEach((line) => {
+        const v = toValidRecord(line);
+        if (v === undefined) invalidCount += 1;
+        if (v && v !== undefined) allRecords.push(v);
+      });
+
+      const orgMap = new Map();
+      const branchMap = new Map();
+      const centerMap = new Map();
+
+      allRecords.forEach((r) => {
+        const orgKey = `${r.itemCode}||${r.itemName}`;
+        const branchKey = `${r.branch}||${r.itemCode}||${r.itemName}`;
+        const centerKey = `${r.branch}||${r.center}||${r.itemCode}||${r.itemName}`;
+
+        if (!orgMap.has(orgKey)) orgMap.set(orgKey, { itemCode: r.itemCode, itemName: r.itemName, qty: 0 });
+        if (!branchMap.has(branchKey)) branchMap.set(branchKey, { branch: r.branch, itemCode: r.itemCode, itemName: r.itemName, qty: 0 });
+        if (!centerMap.has(centerKey)) centerMap.set(centerKey, { branch: r.branch, center: r.center, itemCode: r.itemCode, itemName: r.itemName, qty: 0 });
+
+        orgMap.get(orgKey).qty += r.qty;
+        branchMap.get(branchKey).qty += r.qty;
+        centerMap.get(centerKey).qty += r.qty;
+      });
+
+      const orgRows = Array.from(orgMap.values()).sort((a, b) => b.qty - a.qty || a.itemName.localeCompare(b.itemName, 'ko'));
+      const branchRows = Array.from(branchMap.values()).sort((a, b) => a.branch.localeCompare(b.branch, 'ko') || b.qty - a.qty);
+      const centerRows = Array.from(centerMap.values()).sort((a, b) => a.branch.localeCompare(b.branch, 'ko') || a.center.localeCompare(b.center, 'ko') || b.qty - a.qty);
+
+      renderTable(sumOrg, orgRows, [
+        { key: 'itemCode' },
+        { key: 'itemName' },
+        { key: 'qty', num: true }
+      ]);
+
+      renderTable(sumBranch, branchRows, [
+        { key: 'branch' },
+        { key: 'itemCode' },
+        { key: 'itemName' },
+        { key: 'qty', num: true }
+      ]);
+
+      renderTable(sumCenter, centerRows, [
+        { key: 'branch' },
+        { key: 'center' },
+        { key: 'itemCode' },
+        { key: 'itemName' },
+        { key: 'qty', num: true }
+      ]);
+
+      const totalQty = allRecords.reduce((acc, cur) => acc + cur.qty, 0);
+      stats.innerHTML = [
+        `입력 행: ${lines.length.toLocaleString('ko-KR')}`,
+        `유효 행: ${allRecords.length.toLocaleString('ko-KR')}`,
+        `오류 행: ${invalidCount.toLocaleString('ko-KR')}`,
+        `총 필요수량: ${totalQty.toLocaleString('ko-KR')}`
+      ].map((s) => `<span>${s}</span>`).join('');
+    }
+
+    function saveRows() {
+      const rows = getRows().map((r) => ({
+        org: normalize(r.org.value),
+        branch: normalize(r.branch.value),
+        center: normalize(r.center.value),
+        itemCode: normalize(r.itemCode.value),
+        itemName: normalize(r.itemName.value),
+        qty: normalize(r.qty.value),
+        note: normalize(r.note.value)
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+    }
+
+    function loadRows() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      try {
+        const rows = JSON.parse(raw);
+        if (!Array.isArray(rows)) return false;
+        rows.forEach((row) => addRow(row));
+        return rows.length > 0;
+      } catch {
+        return false;
+      }
+    }
+
+    document.getElementById('addRowBtn').addEventListener('click', () => {
+      addRow();
+      saveRows();
+      recalc();
+    });
+
+    document.getElementById('addSampleBtn').addEventListener('click', () => {
+      const samples = [
+        { org: 'A청', branch: '동부지청', center: '1센터', itemCode: 'P001', itemName: '마스크', qty: 120, note: '' },
+        { org: 'A청', branch: '동부지청', center: '2센터', itemCode: 'P001', itemName: '마스크', qty: 90, note: '' },
+        { org: 'A청', branch: '서부지청', center: '3센터', itemCode: 'P002', itemName: '장갑', qty: 45, note: '' },
+        { org: 'A청', branch: '서부지청', center: '3센터', itemCode: 'P003', itemName: '소독제', qty: 18, note: '' }
+      ];
+      samples.forEach((s) => addRow(s));
+      saveRows();
+      recalc();
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      inputBody.innerHTML = '';
+      localStorage.removeItem(STORAGE_KEY);
+      addRow();
+      addRow();
+      recalc();
+    });
+
+    if (!loadRows()) {
+      addRow();
+      addRow();
+      addRow();
+    }
+    recalc();
+  </script>
+</body>
+</html>
