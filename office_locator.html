@@ -1,0 +1,509 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>고용노동 기관 찾기</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #132030;
+      --muted: #4d5e70;
+      --line: #d7e0e8;
+      --primary: #0b66c3;
+      --chip: #e8f2ff;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Pretendard", "Noto Sans KR", sans-serif; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 22px 14px 40px; }
+    .hero { background: linear-gradient(135deg, #0b66c3, #2f8de8); color: #fff; border-radius: 16px; padding: 20px; }
+    .hero h1 { margin: 0 0 8px; font-size: 24px; }
+    .hero p { margin: 0; opacity: 0.95; }
+    .grid { display: grid; gap: 14px; margin-top: 14px; }
+    @media (min-width: 940px) { .grid { grid-template-columns: 1.1fr 0.9fr; } }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+    h2 { margin: 0 0 10px; font-size: 18px; }
+    label { display: block; margin: 10px 0 6px; font-size: 13px; color: var(--muted); }
+    input, select, button { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: inherit; }
+    .row { display: grid; gap: 10px; }
+    @media (min-width: 720px) { .row.two { grid-template-columns: 1fr 1fr; } }
+    button { border: none; background: var(--primary); color: #fff; font-weight: 600; cursor: pointer; }
+    .search-actions { margin-top: 18px; }
+    .status { margin-top: 8px; font-size: 13px; color: var(--muted); min-height: 20px; }
+    .list { display: grid; gap: 10px; margin-top: 10px; }
+    .item { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: #fff; }
+    .item h3 { margin: 0 0 8px; font-size: 16px; }
+    .meta { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .chip { font-size: 12px; padding: 4px 8px; background: var(--chip); border-radius: 999px; color: #0a4988; }
+    .links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .link-btn { width: auto; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); text-decoration: none; color: var(--text); font-size: 12px; }
+    .muted { color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>고용노동 기관 위치 찾기</h1>
+      <p>지역과 원하는 업무를 선택하면 담당 가능 기관을 추천하고 지도 링크를 제공합니다.</p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>기관 검색</h2>
+        <div class="row two">
+          <div>
+            <label for="sidoSelect">시/도</label>
+            <select id="sidoSelect">
+              <option value="">시/도 전체</option>
+            </select>
+            <label for="sigunguSelect">시/군</label>
+            <select id="sigunguSelect">
+              <option value="">시/군 전체</option>
+            </select>
+          </div>
+          <div>
+            <label for="taskSelect">업무 카테고리</label>
+            <select id="taskSelect">
+              <option value="">전체</option>
+              <option value="실업급여">실업급여</option>
+              <option value="국민취업지원">국민취업지원</option>
+              <option value="취업알선">취업알선</option>
+              <option value="직업훈련">직업훈련</option>
+              <option value="기업지원">기업지원</option>
+              <option value="고용안정">고용안정</option>
+              <option value="모성보호">모성보호</option>
+              <option value="임금체불">임금체불</option>
+              <option value="근로감독">근로감독</option>
+              <option value="직장내괴롭힘">직장내괴롭힘/노동권익</option>
+              <option value="산업안전">산업안전/산재예방</option>
+              <option value="중대재해">중대재해/재해조사</option>
+              <option value="산재보상">산재보상(근로복지공단)</option>
+              <option value="외국인업무">외국인업무(EPS/권익)</option>
+            </select>
+          </div>
+        </div>
+        <div class="search-actions">
+          <button id="searchBtn">기관 찾기</button>
+        </div>
+        <p id="status" class="status"></p>
+        <div id="resultList" class="list"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="data/offices.national.full.js"></script>
+  <script>
+    const TASK_SYNONYMS = {
+      "실업급여": ["실업급여", "구직급여", "실업인정", "수급자격"],
+      "국민취업지원": ["국민취업지원", "국취", "구직촉진수당"],
+      "취업알선": ["취업알선", "취업상담", "일자리", "구인구직"],
+      "직업훈련": ["직업훈련", "내일배움", "훈련", "카드"],
+      "기업지원": ["기업지원", "채용지원", "고용장려금"],
+      "고용안정": ["고용안정", "고용유지"],
+      "모성보호": ["모성보호", "출산휴가", "육아휴직"],
+      "임금체불": ["임금체불", "체불", "체불임금", "임금"],
+      "근로감독": ["근로감독", "노동감독", "감독"],
+      "직장내괴롭힘": ["직장내괴롭힘", "괴롭힘", "노동권익", "직장내"],
+      "산업안전": ["산업안전", "안전보건", "산재예방", "유해위험"],
+      "중대재해": ["중대재해", "재해조사", "중상해", "사망사고"],
+      "산재보상": ["산재보상", "산재신청", "요양급여", "휴업급여", "근로복지공단", "산재"],
+      "외국인업무": ["외국인", "외국인고용", "고용허가제", "eps", "외국인근로자", "외국인력", "외국인권익"]
+    };
+
+    const FALLBACK_SAMPLE_DATA = [
+      {
+        id: "seoul-center",
+        name: "서울고용복지+센터",
+        type: "고용복지+센터",
+        region: { sido: "서울특별시", sigungu: "중구" },
+        jurisdiction: ["종로구", "중구", "동대문구"],
+        address: "서울특별시 중구 삼일대로 363(장교동) 장교빌딩 1~4층",
+        tel: "02-2004-7301",
+        services: ["실업급여", "국민취업지원", "취업알선", "직업훈련", "고용안정", "모성보호"],
+        source: "https://www.work.go.kr/seoul/ctrIntro/guideMap/guideMap.do"
+      },
+      {
+        id: "daejeon-center",
+        name: "대전고용센터",
+        type: "고용복지+센터",
+        region: { sido: "대전광역시", sigungu: "서구" },
+        jurisdiction: ["대전광역시", "충청남도 금산군"],
+        address: "대전광역시 서구 문정로 56 (탄방동 659)",
+        tel: "042-480-6000",
+        services: ["실업급여", "국민취업지원", "취업알선", "기업지원", "직업훈련"],
+        source: "https://www.work.go.kr/daejeon/ctrIntro/deptStaffInfo/deptStaffInfoList.do"
+      },
+      {
+        id: "buyeo-center",
+        name: "부여고용센터",
+        type: "고용복지센터",
+        region: { sido: "충청남도", sigungu: "부여군" },
+        jurisdiction: ["부여군"],
+        address: "충청남도 부여군 부여읍 신동엽길 6 성모크리닉센터 3층",
+        tel: "041-930-6236",
+        services: ["국민취업지원", "취업알선", "실업급여"],
+        source: "https://www.work.go.kr/buyeo/ctrIntro/guideMap/guideMap.do?mainCode=4&subCode=5&subNaviMenuCd=40500"
+      },
+      {
+        id: "busan-center",
+        name: "부산고용센터",
+        type: "고용복지+센터",
+        region: { sido: "부산광역시", sigungu: "부산진구" },
+        jurisdiction: ["남구", "동구", "부산진구", "서구", "연제구", "영도구", "중구"],
+        address: "부산광역시 부산진구 중앙대로 993(양정동)",
+        tel: "051-860-1919",
+        services: ["국민취업지원", "실업급여", "취업알선", "기업지원", "직업훈련"],
+        source: "https://www.work.go.kr/busan/ctrIntro/deptStaffInfo/deptStaffInfoList.do?mainCode=4&subCode=3&subNaviMenuCd=40300"
+      },
+      {
+        id: "incheon-center",
+        name: "인천고용센터",
+        type: "고용복지+센터",
+        region: { sido: "인천광역시", sigungu: "남동구" },
+        jurisdiction: ["남동구", "동구", "미추홀구", "연수구", "옹진군", "중구"],
+        address: "인천광역시 남동구 문화로 131 (구월동)",
+        tel: "032-460-4701",
+        services: ["실업급여", "국민취업지원", "취업알선", "기업지원", "직업훈련"],
+        source: "https://www.work.go.kr/incheon/ctrIntro/deptStaffInfo/deptStaffInfoList.do"
+      },
+      {
+        id: "suwon-center",
+        name: "수원고용센터",
+        type: "고용센터",
+        region: { sido: "경기도", sigungu: "수원시" },
+        jurisdiction: ["수원시", "수원시 팔달구", "수원시 장안구", "수원시 권선구", "수원시 영통구"],
+        address: "경기도 수원시 팔달구 경수대로 584",
+        tel: "031-231-7860",
+        services: ["실업급여", "국민취업지원", "취업알선", "직업훈련", "기업지원"],
+        source: "https://www.work.go.kr/suwon/ctrIntro/guideMap/guideMap.do"
+      },
+      {
+        id: "ansan-labor-office",
+        name: "고용노동부 안산지청",
+        type: "지방고용노동지청",
+        region: { sido: "경기도", sigungu: "안산시 단원구" },
+        jurisdiction: ["안산시", "시흥시"],
+        address: "경기도 안산시 단원구 적금로1길 26",
+        tel: "031-412-1992",
+        services: ["임금체불", "근로감독", "직장내괴롭힘", "산업안전", "중대재해", "산재예방"],
+        source: "https://www.moel.go.kr/local/ansan/introduce/staff/list.do"
+      },
+      {
+        id: "busanbukbu-labor-office",
+        name: "고용노동부 부산북부지청",
+        type: "지방고용노동지청",
+        region: { sido: "부산광역시", sigungu: "사상구" },
+        jurisdiction: ["사상구", "북구", "강서구"],
+        address: "부산광역시 사상구 백양대로 804 (덕포동)",
+        tel: "051-309-1500",
+        services: ["임금체불", "근로감독", "직장내괴롭힘", "산업안전", "산재예방"],
+        source: "https://www.moel.go.kr/local/busanbukbu/introduce/direction/list.do"
+      },
+      {
+        id: "seoul-regional-labor-office",
+        name: "서울지방고용노동청",
+        type: "지방고용노동청",
+        region: { sido: "서울특별시", sigungu: "중구" },
+        jurisdiction: ["서울특별시"],
+        address: "서울특별시 중구 삼일대로 363 (장교동)",
+        tel: "02-2231-0009",
+        services: ["근로감독", "임금체불", "직장내괴롭힘", "산업안전", "중대재해", "산재예방"],
+        source: "https://www.moel.go.kr/local/seoul/introduce/staff/list.do"
+      },
+      {
+        id: "comwel-national",
+        name: "근로복지공단 고객지원(산재보상)",
+        type: "근로복지공단",
+        region: { sido: "전국", sigungu: "전국" },
+        jurisdiction: ["전국"],
+        address: "울산광역시 중구 종가로 340 (근로복지공단)",
+        tel: "1588-0075",
+        services: ["산재보상", "요양급여", "휴업급여", "산재보험"],
+        source: "https://devkeupyeo.comwel.or.kr/"
+      }
+    ];
+
+    const SAMPLE_DATA = Array.isArray(window.NATIONAL_OFFICES) && window.NATIONAL_OFFICES.length
+      ? window.NATIONAL_OFFICES
+      : FALLBACK_SAMPLE_DATA;
+
+    const sidoSelect = document.getElementById("sidoSelect");
+    const sigunguSelect = document.getElementById("sigunguSelect");
+    const taskSelect = document.getElementById("taskSelect");
+    const searchBtn = document.getElementById("searchBtn");
+    const resultList = document.getElementById("resultList");
+    const statusEl = document.getElementById("status");
+
+    let dataset = [...SAMPLE_DATA];
+
+    function normalizeText(text) {
+      return String(text || "").toLowerCase().replace(/\s+/g, "");
+    }
+
+    function uniqueSorted(values) {
+      return [...new Set(values.filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), "ko"));
+    }
+
+    function populateSelect(selectEl, values, allLabel) {
+      const previous = selectEl.value;
+      selectEl.innerHTML = "";
+      const first = document.createElement("option");
+      first.value = "";
+      first.textContent = allLabel;
+      selectEl.appendChild(first);
+      values.forEach((value) => {
+        const opt = document.createElement("option");
+        opt.value = value;
+        opt.textContent = value;
+        selectEl.appendChild(opt);
+      });
+      if (values.includes(previous)) {
+        selectEl.value = previous;
+      }
+    }
+
+    function getSidoList() {
+      return uniqueSorted(dataset.map((office) => office.region?.sido));
+    }
+
+    function toCityLevel(value) {
+      const v = String(value || "").trim();
+      if (!v) return "";
+      const m = v.match(/([가-힣A-Za-z]+(?:시|군))/);
+      return m ? m[1] : "";
+    }
+
+    function getSigunguList(sido) {
+      const rows = dataset.filter((office) => !sido || office.region?.sido === sido);
+      const collected = [];
+      rows.forEach((office) => {
+        const r = toCityLevel(office.region?.sigungu);
+        if (r) collected.push(r);
+        (office.jurisdiction || []).forEach((j) => {
+          const city = toCityLevel(j);
+          if (city) collected.push(city);
+        });
+      });
+      return uniqueSorted(collected);
+    }
+
+    function populateRegionSelectors() {
+      const previousSido = sidoSelect.value;
+      const previousSigungu = sigunguSelect.value;
+      populateSelect(sidoSelect, getSidoList(), "시/도 전체");
+      if (previousSido) sidoSelect.value = previousSido;
+      populateSelect(sigunguSelect, getSigunguList(sidoSelect.value), "시/군 전체");
+      if (previousSigungu && [...sigunguSelect.options].some((o) => o.value === previousSigungu)) {
+        sigunguSelect.value = previousSigungu;
+      }
+    }
+
+    function selectedRegionValue() {
+      return sigunguSelect.value || sidoSelect.value || "";
+    }
+
+    function selectedRegionLabel() {
+      const parts = [sidoSelect.value, sigunguSelect.value].filter(Boolean);
+      return parts.join(" ").trim();
+    }
+
+    function canonicalTask(inputTask) {
+      const t = normalizeText(inputTask);
+      for (const [canon, aliases] of Object.entries(TASK_SYNONYMS)) {
+        for (const alias of aliases) {
+          if (t.includes(normalizeText(alias))) return canon;
+        }
+      }
+      return inputTask.trim();
+    }
+
+    function regionScore(office, region) {
+      const q = normalizeText(region);
+      if (!q) return 0;
+
+      const chunks = [
+        office.region?.sido,
+        toCityLevel(office.region?.sigungu),
+        ...(office.jurisdiction || [])
+      ].map((x) => normalizeText(toCityLevel(x) || x));
+
+      if (chunks.some(c => c === q)) return 6;
+      if (chunks.some(c => c.includes(q) || q.includes(c))) return 4;
+      if (normalizeText(office.address).includes(q)) return 2;
+      return 0;
+    }
+
+    function taskScore(office, taskCanon) {
+      const q = normalizeText(taskCanon);
+      if (!q) return 0;
+      const svc = (office.services || []).map(normalizeText);
+      const verified = office.serviceVerified !== false;
+      if (svc.includes(q)) return verified ? 6 : 4;
+      if (svc.some(s => s.includes(q) || q.includes(s))) return verified ? 4 : 2;
+      return 0;
+    }
+
+    function getSearchUnits() {
+      const units = [];
+      dataset.forEach((office) => {
+        const departments = Array.isArray(office.departments) ? office.departments : [];
+        if (departments.length) {
+          const covered = new Set();
+          departments.forEach((dept, idx) => {
+            const deptServices = Array.isArray(dept.services) ? dept.services : [];
+            deptServices.forEach((s) => covered.add(s));
+            units.push({
+              unitId: `${office.id || office.name}-dept-${idx}`,
+              office,
+              departmentName: dept.name || "",
+              address: dept.address || office.address,
+              tel: dept.tel || office.tel,
+              services: deptServices,
+              serviceVerified: true,
+              serviceSource: dept.source || office.serviceSource || office.source,
+              source: dept.source || office.source,
+            });
+          });
+          const officeServices = Array.isArray(office.services) ? office.services : [];
+          const remaining = officeServices.filter((s) => !covered.has(s));
+          if (remaining.length) {
+            units.push({
+              unitId: `${office.id || office.name}-dept-common`,
+              office,
+              departmentName: "공통안내(부서세부 미등록)",
+              address: office.address,
+              tel: office.tel,
+              services: remaining,
+              serviceVerified: office.serviceVerified !== false,
+              serviceSource: office.serviceSource || office.source,
+              source: office.source,
+            });
+          }
+          return;
+        }
+        units.push({
+          unitId: `${office.id || office.name}-office`,
+          office,
+          departmentName: "",
+          address: office.address,
+          tel: office.tel,
+          services: Array.isArray(office.services) ? office.services : [],
+          serviceVerified: office.serviceVerified !== false,
+          serviceSource: office.serviceSource || office.source,
+          source: office.source,
+        });
+      });
+      return units;
+    }
+
+    function buildMapLinks(address, name) {
+      const query = encodeURIComponent(`${name} ${address}`);
+      return {
+        google: `https://www.google.com/maps/search/?api=1&query=${query}`,
+        naver: `https://map.naver.com/v5/search/${query}`,
+        kakao: `https://map.kakao.com/?q=${query}`
+      };
+    }
+
+    function searchOffices(region, task) {
+      const canon = canonicalTask(task);
+      const hasRegion = normalizeText(region).length > 0;
+      const hasTask = normalizeText(task).length > 0;
+      const units = getSearchUnits();
+      const scored = units.map((unit) => {
+        const office = unit.office;
+        const scope = {
+          region: office.region,
+          jurisdiction: office.jurisdiction,
+          address: unit.address || office.address
+        };
+        const rs = regionScore(scope, region);
+        const ts = taskScore({ services: unit.services, serviceVerified: unit.serviceVerified }, canon);
+        return { unit, office, score: rs + ts, rs, ts, canon };
+      });
+
+      const filtered = scored
+        .filter((x) => {
+          const isNationwide = (x.office.jurisdiction || []).some((j) => normalizeText(j) === "전국");
+          if (hasRegion && canon === "산재보상" && isNationwide) return true;
+          if (hasRegion && x.rs <= 0) return false;
+          if (hasTask && x.ts <= 0) return false;
+          if (!hasRegion && !hasTask) return true;
+          return x.score > 0;
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 8);
+
+      return filtered;
+    }
+
+    function renderResults(rows, region, task) {
+      resultList.innerHTML = "";
+      if (!rows.length) {
+        statusEl.textContent = "입력한 지역/업무와 일치하는 기관이 없습니다. 관할 데이터 추가 후 다시 검색하거나 1350으로 확인해 주세요.";
+        return;
+      }
+
+      statusEl.textContent = `검색어: 지역 '${region || "전체"}', 업무 '${task || "전체"}' / ${rows.length}건`;
+      if (canonicalTask(task) === "산재보상") {
+        statusEl.textContent += " | 산재보상 급여 신청·지급은 근로복지공단(1588-0075) 연계가 기본입니다.";
+      }
+      if (canonicalTask(task) === "외국인업무") {
+        statusEl.textContent += " | 외국인업무는 부서 데이터가 명시된 기관만 표시됩니다.";
+      }
+      rows.forEach(({ unit, office, rs, ts, canon }) => {
+        const links = buildMapLinks(unit.address || office.address, office.name);
+        const deptLine = unit.departmentName ? `<p class="meta">담당부서: ${escapeHtml(unit.departmentName)}</p>` : "";
+        const serviceBasis = unit.serviceVerified
+          ? "부서/직원소개 업무기술 기반"
+          : "기본 공통업무(검증 필요)";
+        const card = document.createElement("div");
+        card.className = "item";
+        card.innerHTML = `
+          <h3>${escapeHtml(office.name)} <span class="muted">(${escapeHtml(office.type || "기관")})</span></h3>
+          ${deptLine}
+          <p class="meta">주소: ${escapeHtml(unit.address || office.address || "-")}</p>
+          <p class="meta">전화: ${escapeHtml(unit.tel || office.tel || "-")}</p>
+          <p class="meta">관할: ${escapeHtml((office.jurisdiction || []).join(", ") || "-")}</p>
+          <p class="meta">업무근거: ${escapeHtml(serviceBasis)}</p>
+          <p class="meta">매칭점수: 지역 ${rs} + 업무 ${ts} / 표준업무: ${escapeHtml(canon || "-")}</p>
+          <div class="chips">${(unit.services || []).map(s => `<span class="chip">${escapeHtml(s)}</span>`).join("")}</div>
+          <div class="links">
+            <a class="link-btn" target="_blank" href="${links.google}">구글맵</a>
+            <a class="link-btn" target="_blank" href="${links.naver}">네이버맵</a>
+            <a class="link-btn" target="_blank" href="${links.kakao}">카카오맵</a>
+            <a class="link-btn" target="_blank" href="${unit.source || office.source || "#"}">출처</a>
+          </div>
+        `;
+        resultList.appendChild(card);
+      });
+    }
+
+    function escapeHtml(v) {
+      return String(v || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    sidoSelect.addEventListener("change", () => {
+      populateSelect(sigunguSelect, getSigunguList(sidoSelect.value), "시/군 전체");
+    });
+
+    searchBtn.addEventListener("click", () => {
+      const region = selectedRegionValue();
+      const regionLabel = selectedRegionLabel();
+      const task = taskSelect.value.trim();
+      const rows = searchOffices(region, task);
+      renderResults(rows, regionLabel, task);
+    });
+
+    populateRegionSelectors();
+    renderResults(searchOffices("", ""), "", "");
+  </script>
+</body>
+</html>

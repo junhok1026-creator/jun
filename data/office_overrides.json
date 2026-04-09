@@ -1,0 +1,62 @@
+﻿[
+  {
+    "id": "seoul-regional-labor-office",
+    "name": "서울지방고용노동청",
+    "type": "지방고용노동청",
+    "region": { "sido": "서울특별시", "sigungu": "중구" },
+    "jurisdiction": ["서울특별시"],
+    "address": "서울특별시 중구 삼일대로 363",
+    "tel": "02-2231-0009",
+    "services": ["임금체불", "근로감독", "직장내괴롭힘", "산업안전", "중대재해", "산재예방"],
+    "source": "https://www.moel.go.kr/local/seoul/introduce/staff/list.do"
+  },
+  {
+    "id": "ansan-labor-office",
+    "name": "고용노동부 안산지청",
+    "type": "지방고용노동지청",
+    "region": { "sido": "경기도", "sigungu": "안산시 단원구" },
+    "jurisdiction": ["안산시", "시흥시"],
+    "address": "경기도 안산시 단원구 적금로1길 26",
+    "tel": "031-412-1992",
+    "services": ["임금체불", "근로감독", "직장내괴롭힘", "산업안전", "중대재해", "산재예방"],
+    "departments": [
+      {
+        "name": "근로개선지도과",
+        "address": "경기도 안산시 단원구 적금로1길 26",
+        "tel": "031-412-1900",
+        "services": ["임금체불", "근로감독", "직장내괴롭힘"],
+        "source": "https://www.moel.go.kr/local/ansan/introduce/staff/list.do"
+      },
+      {
+        "name": "지역협력과(외국인력팀)",
+        "address": "경기도 안산시 단원구 적금로1길 26",
+        "tel": "031-412-1992",
+        "services": ["외국인업무", "외국인근로자권익"],
+        "source": "https://www.moel.go.kr/local/ansan/introduce/staff/list.do"
+      }
+    ],
+    "source": "https://www.moel.go.kr/local/ansan/introduce/staff/list.do"
+  },
+  {
+    "id": "busanbukbu-labor-office",
+    "name": "고용노동부 부산북부지청",
+    "type": "지방고용노동지청",
+    "region": { "sido": "부산광역시", "sigungu": "사상구" },
+    "jurisdiction": ["사상구", "북구", "강서구"],
+    "address": "부산광역시 사상구 백양대로 804",
+    "tel": "051-309-1500",
+    "services": ["임금체불", "근로감독", "직장내괴롭힘", "산업안전", "산재예방"],
+    "source": "https://www.moel.go.kr/local/busanbukbu/introduce/direction/list.do"
+  },
+  {
+    "id": "comwel-national",
+    "name": "근로복지공단 고객지원(산재보상)",
+    "type": "근로복지공단",
+    "region": { "sido": "전국", "sigungu": "전국" },
+    "jurisdiction": ["전국"],
+    "address": "울산광역시 중구 종가로 340 (근로복지공단)",
+    "tel": "1588-0075",
+    "services": ["산재보상", "요양급여", "휴업급여", "산재보험"],
+    "source": "https://devkeupyeo.comwel.or.kr/"
+  }
+]

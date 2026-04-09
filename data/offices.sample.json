@@ -1,0 +1,128 @@
+﻿[
+  {
+    "id": "seoul-center",
+    "name": "서울고용복지+센터",
+    "type": "고용복지+센터",
+    "region": { "sido": "서울특별시", "sigungu": "중구" },
+    "jurisdiction": ["종로구", "중구", "동대문구"],
+    "address": "서울특별시 중구 삼일대로 363(장교동) 장교빌딩 1~4층",
+    "tel": "02-2004-7301",
+    "services": ["실업급여", "국민취업지원", "취업알선", "직업훈련", "고용안정", "모성보호"],
+    "source": "https://www.work.go.kr/seoul/ctrIntro/guideMap/guideMap.do"
+  },
+  {
+    "id": "daejeon-center",
+    "name": "대전고용센터",
+    "type": "고용복지+센터",
+    "region": { "sido": "대전광역시", "sigungu": "서구" },
+    "jurisdiction": ["대전광역시", "충청남도 금산군"],
+    "address": "대전광역시 서구 문정로 56 (탄방동 659)",
+    "tel": "042-480-6000",
+    "services": ["실업급여", "국민취업지원", "취업알선", "기업지원", "직업훈련"],
+    "source": "https://www.work.go.kr/daejeon/ctrIntro/deptStaffInfo/deptStaffInfoList.do"
+  },
+  {
+    "id": "buyeo-center",
+    "name": "부여고용센터",
+    "type": "고용복지센터",
+    "region": { "sido": "충청남도", "sigungu": "부여군" },
+    "jurisdiction": ["부여군"],
+    "address": "충청남도 부여군 부여읍 신동엽길 6 성모크리닉센터 3층",
+    "tel": "041-930-6236",
+    "services": ["국민취업지원", "취업알선", "실업급여"],
+    "source": "https://www.work.go.kr/buyeo/ctrIntro/guideMap/guideMap.do?mainCode=4&subCode=5&subNaviMenuCd=40500"
+  },
+  {
+    "id": "busan-center",
+    "name": "부산고용센터",
+    "type": "고용복지+센터",
+    "region": { "sido": "부산광역시", "sigungu": "부산진구" },
+    "jurisdiction": ["남구", "동구", "부산진구", "서구", "연제구", "영도구", "중구"],
+    "address": "부산광역시 부산진구 중앙대로 993(양정동)",
+    "tel": "051-860-1919",
+    "services": ["국민취업지원", "실업급여", "취업알선", "기업지원", "직업훈련"],
+    "source": "https://www.work.go.kr/busan/ctrIntro/deptStaffInfo/deptStaffInfoList.do?mainCode=4&subCode=3&subNaviMenuCd=40300"
+  },
+  {
+    "id": "incheon-center",
+    "name": "인천고용센터",
+    "type": "고용복지+센터",
+    "region": { "sido": "인천광역시", "sigungu": "남동구" },
+    "jurisdiction": ["남동구", "동구", "미추홀구", "연수구", "옹진군", "중구"],
+    "address": "인천광역시 남동구 문화로 131 (구월동)",
+    "tel": "032-460-4701",
+    "services": ["실업급여", "국민취업지원", "취업알선", "기업지원", "직업훈련"],
+    "source": "https://www.work.go.kr/incheon/ctrIntro/deptStaffInfo/deptStaffInfoList.do"
+  },
+  {
+    "id": "suwon-center",
+    "name": "수원고용센터",
+    "type": "고용센터",
+    "region": { "sido": "경기도", "sigungu": "수원시" },
+    "jurisdiction": ["수원시", "수원시 팔달구", "수원시 장안구", "수원시 권선구", "수원시 영통구"],
+    "address": "경기도 수원시 팔달구 경수대로 584",
+    "tel": "031-231-7860",
+    "services": ["실업급여", "국민취업지원", "취업알선", "직업훈련", "기업지원"],
+    "source": "https://www.work.go.kr/suwon/ctrIntro/guideMap/guideMap.do"
+  },
+  {
+    "id": "ansan-labor-office",
+    "name": "고용노동부 안산지청",
+    "type": "지방고용노동지청",
+    "region": { "sido": "경기도", "sigungu": "안산시 단원구" },
+    "jurisdiction": ["안산시", "시흥시"],
+    "address": "경기도 안산시 단원구 적금로1길 26",
+    "tel": "031-412-1992",
+    "services": ["임금체불", "근로감독", "직장내괴롭힘", "산업안전", "중대재해", "산재예방"],
+    "departments": [
+      {
+        "name": "근로개선지도과",
+        "address": "경기도 안산시 단원구 적금로1길 26",
+        "tel": "031-412-1900",
+        "services": ["임금체불", "근로감독", "직장내괴롭힘"],
+        "source": "https://www.moel.go.kr/local/ansan/introduce/staff/list.do"
+      },
+      {
+        "name": "지역협력과(외국인력팀)",
+        "address": "경기도 안산시 단원구 적금로1길 26",
+        "tel": "031-412-1992",
+        "services": ["외국인업무", "외국인근로자권익"],
+        "source": "https://www.moel.go.kr/local/ansan/introduce/staff/list.do"
+      }
+    ],
+    "source": "https://www.moel.go.kr/local/ansan/introduce/staff/list.do"
+  },
+  {
+    "id": "busanbukbu-labor-office",
+    "name": "고용노동부 부산북부지청",
+    "type": "지방고용노동지청",
+    "region": { "sido": "부산광역시", "sigungu": "사상구" },
+    "jurisdiction": ["사상구", "북구", "강서구"],
+    "address": "부산광역시 사상구 백양대로 804 (덕포동)",
+    "tel": "051-309-1500",
+    "services": ["임금체불", "근로감독", "직장내괴롭힘", "산업안전", "산재예방"],
+    "source": "https://www.moel.go.kr/local/busanbukbu/introduce/direction/list.do"
+  },
+  {
+    "id": "seoul-regional-labor-office",
+    "name": "서울지방고용노동청",
+    "type": "지방고용노동청",
+    "region": { "sido": "서울특별시", "sigungu": "중구" },
+    "jurisdiction": ["서울특별시"],
+    "address": "서울특별시 중구 삼일대로 363 (장교동)",
+    "tel": "02-2231-0009",
+    "services": ["근로감독", "임금체불", "직장내괴롭힘", "산업안전", "중대재해", "산재예방"],
+    "source": "https://www.moel.go.kr/local/seoul/introduce/staff/list.do"
+  },
+  {
+    "id": "comwel-national",
+    "name": "근로복지공단 고객지원(산재보상)",
+    "type": "근로복지공단",
+    "region": { "sido": "전국", "sigungu": "전국" },
+    "jurisdiction": ["전국"],
+    "address": "울산광역시 중구 종가로 340 (근로복지공단)",
+    "tel": "1588-0075",
+    "services": ["산재보상", "요양급여", "휴업급여", "산재보험"],
+    "source": "https://devkeupyeo.comwel.or.kr/"
+  }
+]
